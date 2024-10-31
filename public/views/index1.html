@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .grid-container {
+            display: grid;
+            grid-gap: 10px;
+            background-color: #2196F3;
+            padding: 10px;
+            width: 1000px;
+            height: 600px;
+            /* grid-template-areas:
+                "item1 item1 item2 item3 item4"
+                "item5 item6 item2 item7 item8"
+                "item9 item9 item10 item10 item10"; */
+        }
+
+        div[class^="grid-item"] {
+            /* background-color: rgba(255, 255, 255, 0.8); */
+            border: 1px solid rgba(0, 0, 0, 0.8);
+            text-align: center;
+            padding: 20px 0;
+            font-size: 30px;
+        }
+
+        .d-none {
+            display: none;
+        }
+
+        /* neu thiet bi dang duoc doc tai vi tri nay */
+        .thing-there {
+            background-color: green;
+        }
+
+        /* neu khong co thiet bi */
+        .thing-not-there {
+            background-color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="grid-container">
+        <!-- <div class="grid-item1">Number 1</div>
+        <div class="grid-item2">Number 2</div>
+        <div class="grid-item3">Number 3</div>
+        <div class="grid-item4">Number 4</div>
+        <div class="grid-item5">Number 5</div>
+        <div class="grid-item6">Number 6</div>
+        <div class="grid-item7">Number 7</div>
+        <div class="grid-item8">Number 8</div>
+        <div class="grid-item9">Number 9</div>
+        <div class="grid-item10">Number 10</div>
+        <div class="grid-item11">Number 11</div>
+        <div class="grid-item12">Number 12</div>
+        <div class="grid-item13">Number 13</div>
+        <div class="grid-item14">Number 14</div>
+        <div class="grid-item15">Number 15</div> -->
+    </div>
+
+    <!-- to create new acc when a new card is read. -->
+    <dialog id="newAcc-dialog">
+        <p>Form to create new Account!</p>
+        <form method="dialog">
+            <label for="newAccName">Name:</label>
+            <input type="text" id="newAccName" name="newAccName" required>
+            <label for="newAccPhone">Phone Number:</label>
+            <input type="number" id="newAccPhone" name="newAccPhone" required>
+            <label for="uid">UID: </label>
+            <input type="text" id="uid-input" name="uid" value="" disabled>
+            <button>OK</button>
+        </form>
+    </dialog>
+
+    <!-- to show the information of the person who just place the card to the reader -->
+    <div id="cur-person" class="d-none">
+        <p>Current Person</p>
+        <p id="cur-person-uid"></p>
+        <p id="cur-person-name"></p>
+        <p id="cur-person-phone"></p>
+    </div>
+
+
+    <!-- soccket -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        //the overall data structure is save in this matrix
+        let matrix;
+
+        const newAccDialog = document.getElementById('newAcc-dialog');
+        const newAccDialog_closeBtn = document.querySelector('#newAcc-dialog button');
+
+        //handler for the new acc dialog
+        newAccDialog_closeBtn.addEventListener('click', () => {
+            newAccDialog.close();
+            let name = document.getElementById('newAccName').value;
+            let phone = document.getElementById('newAccPhone').value;
+            let uid = document.getElementById('uid-input').value;
+            if (name && phone) {
+                socket.emit("/web/new-person", {
+                    name,
+                    phone,
+                    uid
+                })
+            }
+        });
+
+        const socket = io();
+
+        //NOTE: keep the /web/get-data 
+        //get the data from the server (must have)
+        socket.emit("/web/get-data");
+        //NOTE: keep the /web/get-data-done
+        //handle the data from the server
+        socket.on('/web/get-data-done', (data) => {
+            console.log(data)
+            matrix = data[0];
+            processData(matrix);
+        })
+
+        socket.on('connect', () => {
+            console.log('connected');
+        });
+
+        //handler for the new card found (to render new grid)
+        socket.on("/web/new-card-found", (data) => {
+            console.log(data)
+            matrix = data[0];
+            processData(matrix);
+        })
+
+        //hander for the current position of the thing (if item is there or not)
+        socket.on("/web/pos-of-thing", (data) => {
+            console.log(data)
+            matrix = data[0];
+            processData(matrix);
+        })
+
+        //handler for the new person found (show the information of the person who just place the card to the reader)
+        socket.on("/web/got-person", (data) => {
+            console.log(data)
+            const curPerson = document.getElementById('cur-person');
+            curPerson.classList.remove('d-none');
+            document.getElementById('cur-person-name').innerText = data.name;
+            document.getElementById('cur-person-phone').innerText = data.phone;
+            document.getElementById('cur-person-uid').innerText = data.uid;
+
+        })
+
+        //handler for the new person created
+        socket.on("/web/new-person", (data) => {
+            console.log(data)
+            newAccDialog.showModal();
+            document.getElementById('uid-input').value = data;
+        })
+        socket.on("/web/new-person-done", (data) => {
+            alert('New person created!');
+        })
+    </script>
+    <script>
+
+        //the core function to render the grid
+        function render(data, str) {
+            console.log("rendering data")
+
+            let tempitem = []
+            const gridContainer = document.querySelector('.grid-container');
+            gridContainer.innerHTML = '';
+            for (let i = 0; i < data.length; i++) {
+                if (tempitem.includes(data[i].item)) {
+                    continue;
+                }
+                const gridItem = document.createElement('div');
+                gridItem.classList.add('grid-item');
+                if (data[i].isThingThere) {
+                    gridItem.classList.add("thing-there");
+                    gridItem.classList.remove("thing-not-there");
+                } else {
+                    gridItem.classList.remove("thing-there");
+                    gridItem.classList.add("thing-not-there");
+                }
+                gridItem.style.gridArea = `${data[i].item}`;
+                gridItem.innerText = data[i].item;
+                gridContainer.appendChild(gridItem);
+                tempitem.push(data[i].item)
+            }
+            gridContainer.style.gridTemplateAreas = str;
+        }
+        //flatten array
+        function processData(data) {
+            console.log("processing data")
+
+            let strs = ['', '', ''];
+            for (let i = 0; i < data.length; i++) {
+                strs[i] = data[i].map((item) => {
+                    return item.item;
+                })
+                // console.log(strs[i].join(' '))
+            }
+            let str = strs.reduce((acc, cur) => {
+                console.log(`${acc} ${cur.join(' ').trim()}`)
+                return acc + `"${cur.join(' ').trim()}"\n`
+            }, "")
+            console.log(str)
+            return render(data.flat(), str);
+        }
+    </script>
+</body>
+
+</html>

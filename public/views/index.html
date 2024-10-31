@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mechanical cabinet management</title>
+    <link rel="stylesheet" href="../stylesheets/main.css">
+</head>
+
+<body>
+    <header>
+        <div id="logo">
+            <img src="../image/maintain.png" alt="">
+            <h1>Mechanical cabinet</h1>
+        </div>
+        <div id="login">
+            <div id="btnLock" class="btn shadow">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="#e8eaed">
+                    <path
+                        d="m40-120 440-760 440 760H40Zm138-80h604L480-720 178-200Zm302-40q17 0 28.5-11.5T520-280q0-17-11.5-28.5T480-320q-17 0-28.5 11.5T440-280q0 17 11.5 28.5T480-240Zm-40-120h80v-200h-80v200Zm40-100Z" />
+                </svg>
+                Lock
+            </div>
+            <!-- <div id="btnLogin" class="btn shadow">Log in</div> -->
+            <!-- show svg in html -->
+            <svg class="btn" viewBox="0 0 58 59" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M28.75 44.0541V44.0833M28.75 14.9167V35.3333M55 29.5C55 43.9975 43.2475 55.75 28.75 55.75C14.2525 55.75 2.5 43.9975 2.5 29.5C2.5 15.0025 14.2525 3.25 28.75 3.25C43.2475 3.25 55 15.0025 55 29.5Z"
+                    stroke="#FEFEFE" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+    </header>
+
+    <main>
+        <div id="cabinetContainer">
+            <div id="cabinetTitle">
+                <div class="btn active" id="cabinetTitleBtn1">Stage 1</div>
+                <div class="btn" id="cabinetTitleBtn2">Stage 2</div>
+            </div>
+
+            <div id="cabinet">
+                <div id="stage1" class="grid-container">
+                </div>
+                <div id="stage2" class="inactive">
+
+                </div>
+            </div>
+        </div>
+
+        <div id="info">
+            <div id="userInfoContainer" class="active">
+                <div id="userInfo">
+                    <img src="../image/maintain.png" class="shadow" alt="" id="userInfroAvt">
+                    <div>
+                        <div id="userInfoName">User name</div>
+                        <div id="cur-person-phone">User phone</div>
+                        <div id="cur-person-uid">User UID</div>
+                        <div>Join: <span id="userInfoJoinDate">26/02/2024</span></div>
+                    </div>
+                </div>
+                <div id="logInfoTitle">
+                    <div class="active btn" id="logInfoTitleUser">User</div>
+                    <div>|</div>
+                    <div class="btn" id="logInfoTitleLog">Log</div>
+                </div>
+                <div id="logInfo">
+                    <div id="userDetail" class="active">
+                        No information
+                    </div>
+                    <div id="userLog">
+
+                    </div>
+                </div>
+            </div>
+            <div id="toolInfoContainer">
+                <img src="../image/maintain.png" alt="" id="toolImgDetail">
+                <h2 id="toolInfoName">Hand saw</h2>
+                <div>
+                    <div>
+                        <div>Brand: </div>
+                        <div id="toolInfoBrand">Bosch</div>
+                    </div>
+                    <div>
+                        <div>Model: </div>
+                        <div id="toolInfoModel">GKS 190</div>
+                    </div>
+                    <div>
+                        <div>Materal: </div>
+                        <div id="toolInfoMaterial">Steel</div>
+                    </div>
+                    <div>
+                        <div>Size: </div>
+                        <div id="toolInfoSize">20cm</div>
+                    </div>
+                    <div>
+                        <div>Color: </div>
+                        <div id="toolInfoColor">Blue</div>
+                    </div>
+                    <p id="toolInfoDescription">
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Vel quo modi ea praesentium dolor,
+                        totam debitis velit expedita tempore explicabo corporis sed error beatae, aliquam vero
+                        eligendi
+                        ducimus! At, corporis?
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+    <dialog id="newAcc-dialog">
+        <div>
+            <p>Form to create new Account!</p>
+            <form method="dialog">
+                <label for="newAccName">Name:</label>
+                <input type="text" id="newAccName" name="newAccName" required>
+                <label for="newAccPhone">Phone Number:</label>
+                <input type="number" id="newAccPhone" name="newAccPhone" required>
+                <label for="uid">UID: </label>
+                <input type="text" id="uid-input" name="uid" value="" disabled>
+                <button>OK</button>
+            </form>
+        </div>
+    </dialog>
+</body>
+
+<script>
+    let imgList = {
+        Wire_Stripper: '../image/Wire_Stripper.png',
+        Ratchet_Pipe_Cutter: '../image/Ratchet_Pipe_Cutter.png',
+        Adjustable_Wrench: '../image/Adjustable_Wrench.png',
+        Locking_Piler: '../image/Locking_Piler.png',
+        Electronic_Cutters: '../image/Electronic_Cutters.png',
+        Double_Headed_Screwdriver: '../image/Double_Headed_Screwdriver.png',
+        Interchangeable_Screwdriver: '../image/Interchangeable_Screwdriver.png',
+    }
+
+
+    let stage1 = document.getElementById('stage1');
+    let stage2 = document.getElementById('stage2');
+
+    // info: User - Log btn switch
+    let logInfoTitleUser = document.getElementById('logInfoTitleUser');
+    let logInfoTitleLog = document.getElementById('logInfoTitleLog');
+
+    let userDetail = document.getElementById('userDetail');
+    let userLog = document.getElementById('userLog');
+
+    logInfoTitleUser.addEventListener('click', () => {
+        logInfoTitleUser.classList.add('active');
+        logInfoTitleLog.classList.remove('active');
+        userDetail.classList.add('active');
+        userLog.classList.remove('active');
+    });
+
+    logInfoTitleLog.addEventListener('click', () => {
+        logInfoTitleUser.classList.remove('active');
+        logInfoTitleLog.classList.add('active');
+        userDetail.classList.remove('active');
+        userLog.classList.add('active');
+    });
+
+
+    // cabinet: stage1 - stage2 switch
+    let cabinet = document.getElementById('cabinet');
+    let btnStage1 = document.getElementById('cabinetTitleBtn1');
+    let btnStage2 = document.getElementById('cabinetTitleBtn2');
+
+    btnStage1.addEventListener('click', () => {
+        stage1.classList.remove('inactive');
+        stage2.classList.add('inactive');
+        btnStage1.classList.add('active');
+        btnStage2.classList.remove('active');
+    });
+    btnStage2.addEventListener('click', () => {
+        stage1.classList.add('inactive');
+        stage2.classList.remove('inactive');
+        btnStage1.classList.remove('active');
+        btnStage2.classList.add('active');
+    });
+</script>
+
+<!-- soccket -->
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    //the overall data structure is save in this matrix
+    let matrix;
+
+    const newAccDialog = document.getElementById('newAcc-dialog');
+    const newAccDialog_closeBtn = document.querySelector('#newAcc-dialog button');
+
+    //handler for the new acc dialog
+    newAccDialog_closeBtn.addEventListener('click', () => {
+        newAccDialog.close();
+        let name = document.getElementById('newAccName').value;
+        let phone = document.getElementById('newAccPhone').value;
+        let uid = document.getElementById('uid-input').value;
+        if (name && phone) {
+            socket.emit("/web/new-person", {
+                name,
+                phone,
+                uid
+            })
+        }
+    });
+
+
+    const btnLock = document.querySelector('#btnLock');
+    btnLock.addEventListener('click', () => {
+        socket.emit("/web/lock-door");
+    })
+
+    const socket = io();
+
+    //NOTE: keep the /web/get-data 
+    //get the data from the server (must have)
+    socket.emit("/web/get-data");
+    //NOTE: keep the /web/get-data-done
+    //handle the data from the server
+    socket.on('/web/get-data-done', (data) => {
+        console.log(data)
+        matrix = data[0].flat();
+        processData(data[0]);
+    })
+
+    socket.on('connect', () => {
+        console.log('connected');
+    });
+
+    //handler for the new card found (to render new grid)
+    socket.on("/web/new-card-found", (data) => {
+        console.log(data)
+        processData(data[0]);
+        matrix = data[0].flat();
+    })
+
+    //hander for the current position of the thing (if item is there or not)
+    socket.on("/web/pos-of-thing", (data) => {
+        console.log(data)
+        processData(data[0]);
+        matrix = data[0].flat();
+    })
+
+    //handler for the new person found (show the information of the person who just place the card to the reader)
+    socket.on("/web/got-person", (data) => {
+        console.log(data)
+        const curPerson = document.getElementById('userInfoName');
+        curPerson.classList.remove('d-none');
+        document.getElementById('userInfoName').innerText = data.name;
+        document.getElementById('cur-person-phone').innerText = data.phone;
+        document.getElementById('cur-person-uid').innerText = data.uid;
+
+    })
+
+    //handler for the new person created
+    socket.on("/web/new-person", (data) => {
+        console.log(data)
+        newAccDialog.showModal();
+        document.getElementById('uid-input').value = data;
+    })
+    socket.on("/web/new-person-done", (data) => {
+        alert('New person created!');
+    })
+
+    //the core function to render the grid
+    function render(data, str) {
+        console.log("rendering data")
+
+        let tempitem = []
+        const gridContainer = document.querySelector('.grid-container');
+        gridContainer.innerHTML = '';
+        for (let i = 0; i < data.length; i++) {
+            if (tempitem.includes(data[i].item)) {
+                continue;
+            }
+            const gridItem = document.createElement('div');
+            gridItem.classList.add('grid-item');
+            if (data[i].isThingThere) {
+                if (matrix[i].isThingThere == false) {
+                    let now = (new Date()).toLocaleString('vi-VN');
+                    userLog.innerHTML = `<p>${now}: RETURN ${data[i].item} </p>` + userLog.innerHTML;
+                }
+                gridItem.classList.remove("thing-not-there");
+                gridItem.classList.add("thing-there");
+            } else {
+                if (matrix[i].isThingThere == true) {
+                    let now = (new Date()).toLocaleString('vi-VN');
+                    userLog.innerHTML = `<p>${now}: TAKE ${data[i].item} </p>` + userLog.innerHTML;
+                }
+                gridItem.classList.remove("thing-there");
+                gridItem.classList.add("thing-not-there");
+            }
+            gridItem.style.gridArea = `${data[i].item}`;
+            gridItem.setAttribute('data-item', data[i].item);
+            gridContainer.appendChild(gridItem);
+            // gent child
+            const gridItemChild = document.createElement('div');
+            gridItemChild.id = `gridItemChild${data[i].item}`;
+            gridItem.appendChild(gridItemChild);
+
+            tempitem.push(data[i].item)
+
+            if (data[i].item in imgList) {
+                gridItemChild.style.backgroundImage = `url(${imgList[data[i].item]})`;
+            }
+        }
+        gridContainer.style.gridTemplateAreas = str;
+        rotateImageIfNeed();
+    }
+
+    function rotateImageIfNeed() {
+        const gridContainer = document.querySelector('.grid-container');
+        const gridItems = document.querySelectorAll('.grid-item');
+        gridItems.forEach((item) => {
+            let rect = item.getBoundingClientRect();
+            if (rect.width >= rect.height) {
+                item.childNodes[0].style.transform = 'rotate(0deg)';
+                item.childNodes[0].style.padding = `2% 5%`;
+            } else {
+                item.childNodes[0].style.transform = 'rotate(90deg)';
+                item.childNodes[0].style.padding = `5% 2%`;
+            }
+        })
+    }
+    // Listen for resize events
+    window.addEventListener('resize', rotateImageIfNeed);
+
+    //flatten array
+    function processData(data) {
+        console.log("processing data")
+
+        let strs = ['', '', ''];
+        for (let i = 0; i < data.length; i++) {
+            strs[i] = data[i].map((item) => {
+                return item.item;
+            })
+        }
+        let str = strs.reduce((acc, cur) => {
+            console.log(`${acc} ${cur.join(' ').trim()}`)
+            return acc + `"${cur.join(' ').trim()}"\n`
+        }, "")
+        console.log(str)
+        return render(data.flat(), str);
+    }
+</script>
+
+</html>
